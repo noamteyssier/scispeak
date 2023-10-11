@@ -10,7 +10,7 @@ use crate::{
 };
 
 /// Recover a continuous stretch of bytes from a record.
-pub fn get_contiguous<'a>(record: &'a Record, offset: usize, length: usize) -> &[u8] {
+pub fn get_contiguous(record: &Record, offset: usize, length: usize) -> &[u8] {
     let seq = record.seq();
     let end = offset + length;
     if end > seq.len() {
