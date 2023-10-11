@@ -12,3 +12,4 @@ disambiseq = "0.1.10"
 fxread = "0.2.10"
 gzp = { version="0.11.3", features=["deflate_rust"], default-features = false }
 hashbrown = "0.14.1"
+spinoff = "0.8.0"
