@@ -15,6 +15,10 @@ pub struct Cli {
     #[clap(short = 'o', long, default_value = "scispeak")]
     pub prefix: String,
 
+    /// Write log file
+    #[clap(short = 'l', long)]
+    pub log: bool,
+
     /// Number of bases to skip after ligation barcode for UMI
     #[clap(short = 'u', long, default_value = "6")]
     pub umi_offset: usize,

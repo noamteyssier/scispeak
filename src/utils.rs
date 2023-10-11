@@ -2,6 +2,7 @@ use std::{io::Write, time::Instant};
 
 use anyhow::Result;
 use fxread::Record;
+use serde::{Deserialize, Serialize};
 use spinoff::{spinners, Color, Spinner, Streams};
 
 use crate::{
@@ -12,6 +13,26 @@ use crate::{
 
 /// Update frequency for the spinner (ms).
 const UPDATE_FREQUENCY: usize = 1000;
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct MatchStats {
+    pub total_records: usize,
+    pub matched_ligation: usize,
+    pub matched_cell_barcode: usize,
+    pub fraction_ligation: f64,
+    pub fraction_cell_barcode: f64,
+}
+impl MatchStats {
+    pub fn new(total_records: usize, matched_ligation: usize, matched_cell_barcode: usize) -> Self {
+        Self {
+            total_records,
+            matched_ligation,
+            matched_cell_barcode,
+            fraction_ligation: matched_ligation as f64 / total_records as f64,
+            fraction_cell_barcode: matched_cell_barcode as f64 / total_records as f64,
+        }
+    }
+}
 
 /// Recover a continuous stretch of bytes from a record.
 pub fn get_contiguous(record: &Record, offset: usize, length: usize) -> &[u8] {
@@ -32,7 +53,7 @@ pub fn run_matching<R, W>(
     liga_bc_ref: &LigationBarcodes,
     cell_bc_ref: &CellBarcodes,
     cli: &Cli,
-) -> Result<()>
+) -> Result<MatchStats>
 where
     R: Iterator<Item = Record>,
     W: Write,
@@ -71,9 +92,9 @@ where
     }
     spinner.success("Done!");
 
-    eprintln!("Total records: {}", num_records);
-    eprintln!("Ligation matched: {}", matched_records_liga);
-    eprintln!("Cell matched: {}", matched_records_cell);
-
-    Ok(())
+    Ok(MatchStats::new(
+        num_records,
+        matched_records_liga,
+        matched_records_cell,
+    ))
 }

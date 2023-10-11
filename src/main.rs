@@ -24,6 +24,7 @@ fn main() -> Result<()> {
     // Initialize output filenames.
     let r1_output_filename = format!("{}_R1.fastq.gz", &cli.prefix,);
     let r2_output_filename = format!("{}_R2.fastq.gz", &cli.prefix,);
+    let log_output_filename = format!("{}_log.json", &cli.prefix,);
 
     // Initialize readers and writers.
     let mut r1_reader = initialize_reader(&cli.r1)?;
@@ -32,7 +33,7 @@ fn main() -> Result<()> {
     let mut r2_writer = build_writer(&r2_output_filename, cli.threads, cli.level)?;
 
     // Match barcodes and write to output files.
-    run_matching(
+    let match_stats = run_matching(
         &mut r1_reader,
         &mut r2_reader,
         &mut r1_writer,
@@ -41,6 +42,13 @@ fn main() -> Result<()> {
         &cell_bc_ref,
         &cli,
     )?;
+
+    // Write log file.
+    if cli.log {
+        let mut log_writer = build_writer(&log_output_filename, cli.threads, cli.level)?;
+        serde_json::to_writer_pretty(&mut log_writer, &match_stats)?;
+    }
+    serde_json::to_writer_pretty(&mut std::io::stdout(), &match_stats)?;
 
     Ok(())
 }
